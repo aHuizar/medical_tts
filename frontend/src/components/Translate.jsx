@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import gTTS from 'gtts';
-import TranslateForm from '../forms/TrasnlateForm';
 
 export default function Translate() {
   const [text, setText] = useState('');
   const onChangeHandler = (e) => {
     setText(e.target.value);
-    console.log(e);
   };
   const onSubmit = async () => {
     console.log('clicked', text);
@@ -22,20 +19,19 @@ export default function Translate() {
     let translateText = await res.json();
     translateText = translateText.translatedText;
     console.log(translateText);
-    const gtts = gTTS(translateText, 'es');
-    // eslint-disable-next-line no-unused-vars
-    gtts.save('../../public/trans.mp3', (err, _result) => {
-      if (err) { throw new Error(err); }
-      console.log('Success!');
-    });
+    const utterance = new SpeechSynthesisUtterance(translateText);
+    const voices = window.speechSynthesis.getVoices();
+    // eslint-disable-next-line prefer-destructuring
+    utterance.voice = voices.filter((voice) => voice.name === 'Alex')[0];
+    utterance.lang = 'es-ES';
+    window.speechSynthesis.speak(utterance);
   };
   return (
     <div className="bg-light">
-      <TranslateForm
-        text={text}
-        onChangeHandler={onChangeHandler}
-        onSubmit={onSubmit}
-      />
+      <div className="container">
+        <input type="text" onChange={onChangeHandler} />
+        <button type="button" className="btn btn-primary" onClick={onSubmit}>Translate</button>
+      </div>
       <button
         type="button"
         className="btn btn-warning"
